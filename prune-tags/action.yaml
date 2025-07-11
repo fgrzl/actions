@@ -1,0 +1,19 @@
+name: Prune Tags
+description: Keep only the 5 most recent prerelease tags
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        set -euo pipefail
+        git fetch --tags
+        tags=$(git tag --list "v*-*" | sort -Vr)
+        count=$(echo "$tags" | wc -l)
+        if [ "$count" -le 5 ]; then
+          echo "Only $count pre-release tags, skipping cleanup."
+          exit 0
+        fi
+        echo "$tags" | tail -n +6 | while read -r tag; do
+          echo "Deleting tag: $tag"
+          git push origin :refs/tags/"$tag"
+        done
+      shell: bash

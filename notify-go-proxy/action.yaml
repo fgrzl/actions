@@ -1,0 +1,12 @@
+name: Notify Go Proxy
+description: Ping Go proxy to cache module version
+inputs:
+  tag:
+    required: true
+    description: Semver tag (without "v" prefix)
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        curl -sSf "https://proxy.golang.org/github.com/${{ github.repository }}/@v/v${{ inputs.tag }}.info"
+      shell: bash
