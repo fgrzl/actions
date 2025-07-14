@@ -1,5 +1,11 @@
 name: Prune Tags
 description: Keep only the 5 most recent prerelease tags
+author: "smiggleworth"
+
+branding:
+  icon: "trash"
+  color: "red"
+
 runs:
   using: "composite"
   steps:

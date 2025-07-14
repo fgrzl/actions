@@ -1,9 +1,16 @@
 name: Notify Go Proxy
 description: Ping Go proxy to cache module version
+author: "smiggleworth"
+
+branding:
+  icon: send
+  color: blue
+
 inputs:
   tag:
     required: true
     description: Semver tag (without "v" prefix)
+
 runs:
   using: "composite"
   steps:

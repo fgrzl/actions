@@ -1,16 +1,24 @@
 name: Tag Commit
 description: Git tag and push using semver
+author: "smiggleworth"
+
+branding:
+  icon: tag
+  color: orange
+
 inputs:
   tag:
     required: true
     description: Semver tag to apply (without "v" prefix)
+
 runs:
   using: composite
   steps:
-    - run: |
+    - name: Tag and Push Commit
+      shell: bash
+      run: |
         echo "Tagging as v${{ inputs.tag }}"
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
         git tag "v${{ inputs.tag }}"
         git push origin "v${{ inputs.tag }}"
-      shell: bash
