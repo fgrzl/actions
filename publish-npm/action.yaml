@@ -1,0 +1,48 @@
+name: Publish to npm
+description: Publishes a package to npm registry
+author: "fgrzl"
+
+branding:
+  icon: package
+  color: orange
+
+inputs:
+  npm-token:
+    required: true
+    description: "NPM authentication token"
+  package-path:
+    required: false
+    description: "Path to the package to publish (default: .)"
+  label:
+    required: false
+    description: "Tag to use for pre-release (e.g., next, beta, rc)"
+  version:
+    required: false
+    description: "Version to publish (e.g., 1.2.3 or 1.2.3-beta.1)"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up .npmrc
+      run: |
+        echo "//registry.npmjs.org/:_authToken=${{ inputs.npm-token }}" > ${{ inputs.package-path || '.' }}/.npmrc
+      shell: bash
+
+    - name: Apply Version
+      if: ${{ inputs.version != '' }}
+      run: |
+        echo "Using version: ${{ inputs.version }}"
+        npm version --no-git-tag-version "${{ inputs.version }}"
+      shell: bash
+
+    - name: Publish to npm
+      run: |
+        cd ${{ inputs.package-path || '.' }}
+        if [ -n "${{ inputs.label }}" ]; then
+          echo "Publishing with label: ${{ inputs.label }}"
+          npm publish --access public --tag "${{ inputs.label }}"
+        else
+          echo "Publishing without label"
+          npm publish --access public
+        fi
+      shell: bash
