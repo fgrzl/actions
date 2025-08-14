@@ -12,14 +12,37 @@ runs:
     - run: |
         set -euo pipefail
         git fetch --tags
+        
+        # Get current ref to avoid deleting the tag we're running from
+        current_ref="${GITHUB_REF#refs/tags/}"
+        echo "Current ref: $current_ref"
+        
+        # Get all tags matching pre-release pattern (contains hyphen after version)
         tags=$(git tag --list "v*-*" | sort -Vr)
-        count=$(echo "$tags" | wc -l)
-        if [ "$count" -le 5 ]; then
-          echo "Only $count pre-release tags, skipping cleanup."
+        
+        if [ -z "$tags" ]; then
+          echo "No pre-release tags found."
           exit 0
         fi
+        
+        count=$(echo "$tags" | wc -l)
+        echo "Found $count pre-release tags"
+        
+        if [ "$count" -le 5 ]; then
+          echo "Only $count pre-release tags, keeping all. No cleanup needed."
+          exit 0
+        fi
+        
+        echo "Keeping the 5 most recent pre-release tags, deleting the rest..."
         echo "$tags" | tail -n +6 | while read -r tag; do
-          echo "Deleting tag: $tag"
+          # Skip if this is the current tag we're running from
+          if [ "$tag" = "$current_ref" ]; then
+            echo "Skipping current tag: $tag (cannot delete tag we're running from)"
+            continue
+          fi
+          echo "Deleting pre-release tag: $tag"
           git push origin :refs/tags/"$tag"
         done
+        
+        echo "Pre-release tag cleanup completed."
       shell: bash
